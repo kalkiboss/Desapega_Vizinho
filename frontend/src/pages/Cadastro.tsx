@@ -1,6 +1,14 @@
 import React from 'react';
-
+import { useState} from 'react';
+ 
 export default function Cadastro() {
+    const [title, setTitle] = useState('');
+    const [category, setCategory] = useState('OUTROS');
+    const [price, setPrice] = useState('');
+    const [description, setDescription ] =useState('');
+    const [ author, setAuthor ] = useState('');
+    const [phone, setPhone ] = useState('');
+
     return (
         <div className="page-container cadastro-page">
             <div className="form-card">
@@ -8,7 +16,6 @@ export default function Cadastro() {
                 <p>Preencha os detalhes para os seus vizinhos verem.</p>
 
                 <form className="cadastro-form">
-                    {/* O formulário controlado será implementado na Issue #5 */}
                     <div className="form-group">
                         <label>Título do Anúncio *</label>
                         <input type="text" placeholder="Ex: Bicicleta Caloi Aro 29" disabled />
