@@ -9,6 +9,41 @@ export default function Cadastro() {
     const [ author, setAuthor ] = useState('');
     const [phone, setPhone ] = useState('');
     const [location, setLocation] = useState('');
+    const [error, setError] = useState('');
+
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setError('');
+
+        if (!title.trim()) return setError('Por favor, insira um título para o anúncio.');
+        if (!price.trim()) return setError('O preço do produto é obrigatório.');
+        if (!phone.trim()) return setError('Um número de WhatsApp é necessário para os vizinhos te contatarem.');
+        if (!location.trim()) return setError('A localização interna (Bloco/Apto) é obrigatória para a entrega.');
+
+        const precoConvertido = Number(price);
+        if (isNaN(precoConvertido) || precoConvertido <= 0) {
+            return setError('O preço digitado é inválido. Digite um valor maior que zero.');
+        }
+
+        const digitosTelefone = phone.replace(/\D/g, '');
+        if (digitosTelefone.length < 10) {
+            return setError('O número de WhatsApp está incompleto. Certifique-se de incluir o DDD.');
+        }
+
+        setError('');
+        console.log('Payload validado com sucesso e pronto para envio:', {
+            title: title.trim(),
+            category,
+            price: precoConvertido,
+            description: description.trim(),
+            author: author.trim() || 'Anônimo',
+            phone: digitosTelefone,
+            location: location.trim()
+        });
+        
+        alert('Sucesso! Formulário validado localmente.');
+    };
+
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const input = e.target.value;
@@ -53,7 +88,13 @@ export default function Cadastro() {
                 <h2>Criar Anúncio</h2>
                 <p>Preencha os detalhes para os seus vizinhos verem.</p>
 
-                <form className="cadastro-form">
+                {error && (
+                    <div style={{ backgroundColor: '#fee2e2', border: '1px solid #ef4444', color: '#b91c1c', padding: '12px 16px', borderRadius: '12px', marginBottom: '24px', fontSize: '14px', fontWeight: '700' }}>
+                        ⚠️ {error}
+                    </div>
+                )}
+
+                <form className="cadastro-form" onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label>Título do Anúncio *</label>
                         <input 
@@ -133,7 +174,7 @@ export default function Cadastro() {
                         />
                     </div>
 
-                    <button type="button" className="btn btn-submit">
+                    <button type="submit" className="btn btn-submit">
                         Salvar Anúncio
                     </button>
                 </form>
