@@ -10,6 +10,8 @@ export default function Cadastro() {
     const [phone, setPhone ] = useState('');
     const [location, setLocation] = useState('');
     const [error, setError] = useState('');
+    const [ image, setImage] = useState<string | null>(null);
+
 
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -38,12 +40,31 @@ export default function Cadastro() {
             description: description.trim(),
             author: author.trim() || 'Anônimo',
             phone: digitosTelefone,
-            location: location.trim()
+            location: location.trim(),
+            image
         });
         
         alert('Sucesso! Formulário validado localmente.');
     };
 
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setError('');
+        const arquivo = e.target.files?.[0];
+        
+        if (!arquivo) return;
+
+        if (arquivo.size > 2 * 1024 * 1024) {
+            return setError('A imagem selecionada é muito grande. Escolha uma foto de até 2MB.');
+        }
+
+        const leitor = new FileReader();
+        
+        leitor.onloadend = () => {
+            setImage(leitor.result as string);
+        };
+
+        leitor.readAsDataURL(arquivo);
+    };
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const input = e.target.value;
@@ -172,6 +193,44 @@ export default function Cadastro() {
                             onChange={(e) => setLocation(e.target.value)}
                             maxLength={40}
                         />
+                    </div>
+
+                    <div className="form-group">
+                        <label>Localização no Condomínio *</label>
+                        <input 
+                            type="text" 
+                            placeholder="Ex: Bloco C - Apto 402" 
+                            value={location}
+                            onChange={(e) => setLocation(e.target.value)}
+                            maxLength={40}
+                        />
+                    </div>
+
+                    {/* NOVO: Campo de Upload de Foto com Preview Reativo */}
+                    <div className="form-group">
+                        <label>Foto do Produto (Opcional)</label>
+                        <input 
+                            type="file" 
+                            accept="image/*" 
+                            onChange={handleFileChange}
+                            style={{ padding: '8px 0' }}
+                        />
+                        {image && (
+                            <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <img 
+                                    src={image} 
+                                    alt="Preview do desapego" 
+                                    style={{ maxWidth: '100px', maxHeight: '100px', borderRadius: '12px', objectFit: 'cover', border: '1px solid var(--border-color)' }} 
+                                />
+                                <button 
+                                    type="button" 
+                                    onClick={() => setImage(null)}
+                                    style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', cursor: 'pointer', fontWeight: '700' }}
+                                >
+                                    Remover Foto
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <button type="submit" className="btn btn-submit">
