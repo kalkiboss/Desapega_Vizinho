@@ -2,6 +2,7 @@ import './styles/main.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { AnunciosProvider } from './context/AnunciosContext';
 import App from './App';
 import Home from './pages/Home';
 import Cadastro from './pages/Cadastro';
@@ -30,6 +31,8 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <AnunciosProvider>
+      <RouterProvider router={router} />
+    </AnunciosProvider>
   </React.StrictMode>
 );
