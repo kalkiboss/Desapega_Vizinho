@@ -1,19 +1,26 @@
 import React from 'react';
-import { useState} from 'react';
- 
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAnuncios } from '../context/AnunciosContext';
+
 export default function Cadastro() {
+
+    const navigate = useNavigate();
+    const { anuncios, setAnuncios } = useAnuncios();
+
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState('OUTROS');
     const [price, setPrice] = useState('');
-    const [description, setDescription ] =useState('');
-    const [ author, setAuthor ] = useState('');
-    const [phone, setPhone ] = useState('');
+    const [description, setDescription] = useState('');
+    const [author, setAuthor] = useState('');
+    const [phone, setPhone] = useState('');
     const [location, setLocation] = useState('');
     const [error, setError] = useState('');
-    const [ image, setImage] = useState<string | null>(null);
+    const [image, setImage] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setError('');
 
@@ -32,8 +39,7 @@ export default function Cadastro() {
             return setError('O número de WhatsApp está incompleto. Certifique-se de incluir o DDD.');
         }
 
-        setError('');
-        console.log('Payload validado com sucesso e pronto para envio:', {
+        const payload = {
             title: title.trim(),
             category,
             price: precoConvertido,
@@ -42,15 +48,41 @@ export default function Cadastro() {
             phone: digitosTelefone,
             location: location.trim(),
             image
-        });
-        
-        alert('Sucesso! Formulário validado localmente.');
+        };
+
+        try {
+            setIsSubmitting(true);
+
+            const response = await fetch('http://localhost:3000/v1/ads', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error('Falha ao comunicar com o servidor.');
+            }
+
+            const novoAnuncio = await response.json();
+
+            setAnuncios([novoAnuncio, ...anuncios]);
+
+            navigate('/feed');
+
+        } catch (error) {
+            console.error('Erro ao salvar anúncio:', error);
+            setError('Erro de conexão. Certifique-se de que o servidor (API) está rodando.');
+        } finally {
+            setIsSubmitting(false); // Libera o botão
+        }
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setError('');
         const arquivo = e.target.files?.[0];
-        
+
         if (!arquivo) return;
 
         if (arquivo.size > 2 * 1024 * 1024) {
@@ -58,7 +90,7 @@ export default function Cadastro() {
         }
 
         const leitor = new FileReader();
-        
+
         leitor.onloadend = () => {
             setImage(leitor.result as string);
         };
@@ -69,7 +101,7 @@ export default function Cadastro() {
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const input = e.target.value;
         const apenasNumeros = input.replace(/\D/g, '');
-        
+
         if (apenasNumeros.length <= 2) {
             setPhone(apenasNumeros);
         } else if (apenasNumeros.length <= 7) {
@@ -87,7 +119,7 @@ export default function Cadastro() {
         if (partes.length > 2) {
             limpo = partes[0] + '.' + partes.slice(1).join('');
         }
-        
+
         if (partes[1] && partes[1].length > 2) {
             limpo = partes[0] + '.' + partes[1].slice(0, 2);
         }
@@ -118,9 +150,9 @@ export default function Cadastro() {
                 <form className="cadastro-form" onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label>Título do Anúncio *</label>
-                        <input 
-                            type="text" 
-                            placeholder="Ex: Bicicleta Caloi Aro 29" 
+                        <input
+                            type="text"
+                            placeholder="Ex: Bicicleta Caloi Aro 29"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             maxLength={50}
@@ -129,8 +161,8 @@ export default function Cadastro() {
 
                     <div className="form-group">
                         <label>Categoria</label>
-                        <select 
-                            value={category} 
+                        <select
+                            value={category}
                             onChange={(e) => setCategory(e.target.value)}
                             style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #d4d4d8', backgroundColor: 'var(--bg-surface)' }}
                         >
@@ -144,9 +176,9 @@ export default function Cadastro() {
 
                     <div className="form-group">
                         <label>Preço (R$) *</label>
-                        <input 
-                            type="text" 
-                            placeholder="Ex: 150.00" 
+                        <input
+                            type="text"
+                            placeholder="Ex: 150.00"
                             value={price}
                             onChange={handlePriceChange}
                         />
@@ -154,9 +186,9 @@ export default function Cadastro() {
 
                     <div className="form-group">
                         <label>Descrição detalhada</label>
-                        <input 
-                            type="text" 
-                            placeholder="Ex: Entrego no Bloco C, ótimo estado..." 
+                        <input
+                            type="text"
+                            placeholder="Ex: Entrego no Bloco C, ótimo estado..."
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                         />
@@ -164,9 +196,9 @@ export default function Cadastro() {
 
                     <div className="form-group">
                         <label>Seu Nome / Apelido</label>
-                        <input 
-                            type="text" 
-                            placeholder="Ex: Carlos (Apto 302)" 
+                        <input
+                            type="text"
+                            placeholder="Ex: Carlos (Apto 302)"
                             value={author}
                             onChange={handleAuthorChange}
                             maxLength={30}
@@ -175,9 +207,9 @@ export default function Cadastro() {
 
                     <div className="form-group">
                         <label>WhatsApp de Contato *</label>
-                        <input 
-                            type="text" 
-                            placeholder="Ex: 61999998888" 
+                        <input
+                            type="text"
+                            placeholder="Ex: 61999998888"
                             value={phone}
                             onChange={handlePhoneChange}
                             maxLength={15}
@@ -186,44 +218,32 @@ export default function Cadastro() {
 
                     <div className="form-group">
                         <label>Localização no Condomínio *</label>
-                        <input 
-                            type="text" 
-                            placeholder="Ex: Bloco C - Apto 402" 
+                        <input
+                            type="text"
+                            placeholder="Ex: Bloco C - Apto 402"
                             value={location}
                             onChange={(e) => setLocation(e.target.value)}
                             maxLength={40}
                         />
                     </div>
 
-                    <div className="form-group">
-                        <label>Localização no Condomínio *</label>
-                        <input 
-                            type="text" 
-                            placeholder="Ex: Bloco C - Apto 402" 
-                            value={location}
-                            onChange={(e) => setLocation(e.target.value)}
-                            maxLength={40}
-                        />
-                    </div>
-
-                    {/* NOVO: Campo de Upload de Foto com Preview Reativo */}
                     <div className="form-group">
                         <label>Foto do Produto (Opcional)</label>
-                        <input 
-                            type="file" 
-                            accept="image/*" 
+                        <input
+                            type="file"
+                            accept="image/*"
                             onChange={handleFileChange}
                             style={{ padding: '8px 0' }}
                         />
                         {image && (
                             <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <img 
-                                    src={image} 
-                                    alt="Preview do desapego" 
-                                    style={{ maxWidth: '100px', maxHeight: '100px', borderRadius: '12px', objectFit: 'cover', border: '1px solid var(--border-color)' }} 
+                                <img
+                                    src={image}
+                                    alt="Preview do desapego"
+                                    style={{ maxWidth: '100px', maxHeight: '100px', borderRadius: '12px', objectFit: 'cover', border: '1px solid var(--border-color)' }}
                                 />
-                                <button 
-                                    type="button" 
+                                <button
+                                    type="button"
                                     onClick={() => setImage(null)}
                                     style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', cursor: 'pointer', fontWeight: '700' }}
                                 >
@@ -233,8 +253,13 @@ export default function Cadastro() {
                         )}
                     </div>
 
-                    <button type="submit" className="btn btn-submit">
-                        Salvar Anúncio
+                    <button
+                        type="submit"
+                        className="btn btn-submit"
+                        disabled={isSubmitting}
+                        style={{ opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? 'not-allowed' : 'pointer' }}
+                    >
+                        {isSubmitting ? 'Salvando no banco...' : 'Salvar Anúncio'}
                     </button>
                 </form>
             </div>
