@@ -1,18 +1,19 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
-import { Store, PlusCircle, Tag } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
+import logoApego from '../assets/apego.svg';
 
 export default function Navbar() {
     return (
         <header className="navbar-header">
             <div className="navbar-container">
                 <Link to="/" className="navbar-logo">
-                    <div className="logo-icon">
-                        <Store className="w-[20px] h-[20px]" />
-                    </div>
+                    <img 
+                        src={logoApego} 
+                        alt="Desapega Vizinho" 
+                        style={{ width: '40px', height: '40px', objectFit: 'contain' }} 
+                    />
                     <div>
-                        <h1>Desapega<span className="logo-accent">Vizinho</span></h1>
-                        <p>Mercado Privado</p>
+                        <h1>Desapega<span className="logo-accent"> Vizinho</span></h1>                        
                     </div>
                 </Link>
 
@@ -20,7 +21,7 @@ export default function Navbar() {
                     <Link to="/" className="nav-link">Início</Link>
                     <Link to="/feed" className="nav-link">Anúncios</Link>
                     <Link to="/cadastro" className="nav-link nav-cta">
-                        <PlusCircle className="w-[16px] h-[16px]" /> Anunciar
+                        <PlusCircle size={16} /> Anunciar
                     </Link>
                 </nav>
             </div>
