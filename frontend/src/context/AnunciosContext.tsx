@@ -9,7 +9,8 @@ export interface Anuncio {
     author: string;
     phone: string;
     location: string;
-    image: string | null;
+    images: string[];
+    image?: string;
     createdAt: string;
 }
 
@@ -24,7 +25,7 @@ const AnunciosContext = createContext<AnunciosContextType | undefined>(undefined
 
 export const AnunciosProvider = ({ children }: { children: ReactNode }) => {
     const [anuncios, setAnuncios] = useState<Anuncio[]>([]);
-    const [carregando, setCarregando] = useState<boolean>(true); // Começa como true para exibir o loading no feed
+    const [carregando, setCarregando] = useState<boolean>(true);
 
     return (
         <AnunciosContext.Provider value={{ anuncios, setAnuncios, carregando, setCarregando }}>
