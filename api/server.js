@@ -5,12 +5,13 @@ import { db } from './config/firebase.js';
 const app = express();
 
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.post('/v1/ads', async (req, res) => {
     try {
-        const { title, category, price, description, phone, author, image } = req.body;
+
+        const { title, category, price, description, phone, author, location, images, image } = req.body;
 
         if (!title || !title.trim()) {
             return res.status(400).json({ error: 'O título do anúncio é obrigatório.' });
@@ -22,6 +23,17 @@ app.post('/v1/ads', async (req, res) => {
             return res.status(400).json({ error: 'O WhatsApp de contato é obrigatório.' });
         }
 
+        if (!location || !location.trim()) {
+            return res.status(400).json({ error: 'A localização interna (Bloco/Apto) é obrigatória.' });
+        }
+
+        let arrayDeImagens = [];
+        if (Array.isArray(images)) {
+            arrayDeImagens = images;
+        } else if (image) {
+            arrayDeImagens = [image];
+        }
+
         const newAd = {
             title: title.trim(),
             category: category || 'OUTROS',
@@ -29,7 +41,8 @@ app.post('/v1/ads', async (req, res) => {
             description: description ? description.trim() : '',
             phone: phone.replace(/\D/g, ''),
             author: author ? author.trim() : 'Vizinho Anônimo',
-            image: image || null,
+            location: location.trim(),
+            images: arrayDeImagens,
             createdAt: new Date().toISOString()
         };
 

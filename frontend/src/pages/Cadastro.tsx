@@ -2,6 +2,7 @@ import React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAnuncios } from '../context/AnunciosContext';
+import apego from '../assets/apego.svg';
 
 export default function Cadastro() {
 
@@ -16,7 +17,7 @@ export default function Cadastro() {
     const [phone, setPhone] = useState('');
     const [location, setLocation] = useState('');
     const [error, setError] = useState('');
-    const [image, setImage] = useState<string | null>(null);
+    const [images, setImages] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
 
@@ -47,7 +48,7 @@ export default function Cadastro() {
             author: author.trim() || 'Anônimo',
             phone: digitosTelefone,
             location: location.trim(),
-            image
+            images
         };
 
         try {
@@ -75,27 +76,49 @@ export default function Cadastro() {
             console.error('Erro ao salvar anúncio:', error);
             setError('Erro de conexão. Certifique-se de que o servidor (API) está rodando.');
         } finally {
-            setIsSubmitting(false); // Libera o botão
+            setIsSubmitting(false);
         }
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         setError('');
-        const arquivo = e.target.files?.[0];
 
-        if (!arquivo) return;
+        // Converte os arquivos recebidos em um Array real do JavaScript
+        const arquivosSelecionados = Array.from(e.target.files || []);
+        if (arquivosSelecionados.length === 0) return;
 
-        if (arquivo.size > 2 * 1024 * 1024) {
-            return setError('A imagem selecionada é muito grande. Escolha uma foto de até 2MB.');
+        // Trava de segurança: Máximo de 4 fotos por anúncio para não estourar o banco
+        if (images.length + arquivosSelecionados.length > 4) {
+            return setError('Você pode enviar no máximo 4 fotos por anúncio.');
         }
 
-        const leitor = new FileReader();
+        const novasImagens: string[] = [];
 
-        leitor.onloadend = () => {
-            setImage(leitor.result as string);
-        };
+        // Processa cada arquivo individualmente
+        for (const arquivo of arquivosSelecionados) {
+            // Verifica o tamanho de cada foto
+            if (arquivo.size > 2 * 1024 * 1024) {
+                setError(`A imagem ${arquivo.name} passou do limite de 2MB e foi ignorada.`);
+                continue;
+            }
 
-        leitor.readAsDataURL(arquivo);
+            // Lê o arquivo empacotado em uma Promise para não travar a UI
+            const base64 = await new Promise<string>((resolve, reject) => {
+                const leitor = new FileReader();
+                leitor.onloadend = () => resolve(leitor.result as string);
+                leitor.onerror = reject;
+                leitor.readAsDataURL(arquivo);
+            });
+
+            novasImagens.push(base64);
+        }
+
+        // Junta as fotos que já estavam no estado com as novas que acabaram de chegar
+        setImages((prevImages) => [...prevImages, ...novasImagens]);
+    };
+
+    const removeImage = (indexToRemove: number) => {
+        setImages((prevImages) => prevImages.filter((_, index) => index !== indexToRemove));
     };
 
     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -198,7 +221,7 @@ export default function Cadastro() {
                         <label>Seu Nome / Apelido</label>
                         <input
                             type="text"
-                            placeholder="Ex: Carlos (Apto 302)"
+                            placeholder="Ex: Carlos"
                             value={author}
                             onChange={handleAuthorChange}
                             maxLength={30}
@@ -228,27 +251,34 @@ export default function Cadastro() {
                     </div>
 
                     <div className="form-group">
-                        <label>Foto do Produto (Opcional)</label>
+                        <label>Fotos do Produto (Máximo 4)</label>
                         <input
                             type="file"
                             accept="image/*"
+                            multiple
                             onChange={handleFileChange}
                             style={{ padding: '8px 0' }}
+                            disabled={images.length >= 4}
                         />
-                        {image && (
-                            <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <img
-                                    src={image}
-                                    alt="Preview do desapego"
-                                    style={{ maxWidth: '100px', maxHeight: '100px', borderRadius: '12px', objectFit: 'cover', border: '1px solid var(--border-color)' }}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => setImage(null)}
-                                    style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '8px', fontSize: '12px', cursor: 'pointer', fontWeight: '700' }}
-                                >
-                                    Remover Foto
-                                </button>
+
+                        {images.length > 0 && (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '12px', marginTop: '16px' }}>
+                                {images.map((imgBase64, index) => (
+                                    <div key={index} style={{ position: 'relative', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        <img
+                                            src={imgBase64}
+                                            alt={`Preview ${index + 1}`}
+                                            style={{ width: '100%', height: '100px', borderRadius: '12px', objectFit: 'cover', border: '1px solid var(--border-color)' }}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeImage(index)}
+                                            style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '4px', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: '700' }}
+                                        >
+                                            Remover
+                                        </button>
+                                    </div>
+                                ))}
                             </div>
                         )}
                     </div>
@@ -263,6 +293,26 @@ export default function Cadastro() {
                     </button>
                 </form>
             </div>
+
+            <footer className="home-footer" style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '40px 0 20px 0',
+                borderTop: '1px solid var(--border-color)',
+                marginTop: '24px',
+                gap: '8px'
+            }}>
+                <img
+                    src={apego}
+                    alt="Desapega Vizinho"
+                    style={{ height: '32px', objectFit: 'contain' }}
+                />
+                <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                    © {new Date().getFullYear()} Desapega Vizinho — Todos os direitos reservados.
+                </p>
+            </footer>
         </div>
     );
 }

@@ -1,6 +1,8 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Search, MapPin, Phone, Tag } from 'lucide-react';
+import { Search, MapPin, Phone } from 'lucide-react';
 import { useAnuncios } from '../context/AnunciosContext';
+import apego from '../assets/apego.svg';
+import ImageCarousel from '../components/ImageCarousel';
 
 export default function Feed() {
     const { anuncios, setAnuncios, carregando, setCarregando } = useAnuncios();
@@ -76,14 +78,10 @@ export default function Feed() {
                     {anunciosFiltrados.map((ad) => (
                         <div key={ad.id} className="form-card">
 
-                            {ad.image ? (
-                                <img src={ad.image} alt={ad.title} loading="lazy" className="ad-card-image" />
-                            ) : (
-                                <div className="ad-card-image-placeholder">
-                                    <Tag size={48} />
-                                </div>
-                            )}
-
+                            <ImageCarousel
+                                images={ad.images && ad.images.length > 0 ? ad.images : (ad.image ? [ad.image] : [])}
+                                altTitle={ad.title}
+                            />
                             <div className="ad-card-body">
                                 <div className="ad-card-header">
                                     <span className="ad-card-badge">{ad.category}</span>
@@ -119,6 +117,27 @@ export default function Feed() {
                     ))}
                 </div>
             )}
+
+            <footer className="home-footer" style={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '40px 0 20px 0',
+                borderTop: '1px solid var(--border-color)',
+                marginTop: '24px',
+                gap: '8px'
+            }}>
+                <img
+                    src={apego}
+                    alt="Desapega Vizinho"
+                    style={{ height: '32px', objectFit: 'contain' }}
+                />
+                <p style={{ fontSize: 'var(--fs-xs)', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                    © {new Date().getFullYear()} Desapega Vizinho — Todos os direitos reservados.
+                </p>
+            </footer>
         </div>
+
     );
 }
