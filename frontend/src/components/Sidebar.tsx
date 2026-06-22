@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { PlusCircle, Home, LayoutGrid, X } from 'lucide-react';
+import { PlusCircle, Home, LayoutGrid, User, X } from 'lucide-react';
 import { useEffect } from 'react';
 import logoApego from '../assets/apego.svg';
 
@@ -55,6 +55,11 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <Link to="/cadastro" className="sidebar-link sidebar-cta" onClick={onClose}>
                         <PlusCircle size={18} /> <span>Anunciar Desapego</span>
                     </Link>
+
+                    <Link to="/perfil" className="sidebar-link" onClick={onClose}>
+                        <User size={18} /> <span>Meu Perfil</span>
+                    </Link>
+
                 </nav>
             </aside>
         </>
