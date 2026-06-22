@@ -1,5 +1,8 @@
-import { User, MapPin, Phone, Mail, Edit3 } from 'lucide-react';
+import { useMemo } from 'react';
+import { User, MapPin, Phone, Mail, Edit3, PackageOpen } from 'lucide-react';
 import apego from '../assets/apego.svg';
+import { useAnuncios } from '../context/AnunciosContext';
+import ImageCarousel from '../components/ImageCarousel';
 
 export default function Perfil() {
     const morador = {
@@ -8,6 +11,12 @@ export default function Perfil() {
         telefone: "(61) 99999-8888",
         localizacao: "Bloco C - Apto 402"
     };
+
+    const { anuncios } = useAnuncios();
+
+    const meusAnuncios = useMemo(() => {
+        return anuncios.filter(ad => ad.author === morador.nome);
+    }, [anuncios, morador.nome]);
 
     return (
         <div className="page-container" style={{ display: 'flex', flexDirection: 'column', gap: '32px', paddingTop: '32px' }}>
@@ -62,6 +71,51 @@ export default function Perfil() {
 
                 </div>
             </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h2 style={{ fontSize: 'var(--fs-lg)', fontWeight: 900 }}>Meus Anúncios Ativos</h2>
+                    <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--text-secondary)', fontWeight: 700 }}>
+                        {meusAnuncios.length} {meusAnuncios.length === 1 ? 'item' : 'itens'}
+                    </span>
+                </div>
+
+                {meusAnuncios.length === 0 ? (
+                    <div className="feed-status" style={{ backgroundColor: 'var(--bg-surface)', borderRadius: '24px', border: '1px solid var(--border-color)' }}>
+                        <PackageOpen size={48} style={{ margin: '0 auto 16px', color: 'var(--text-secondary)', opacity: 0.5 }} />
+                        <p>Você ainda não tem nenhum desapego ativo.</p>
+                    </div>
+                ) : (
+                    <div className="ads-grid">
+                        {meusAnuncios.map((ad) => (
+                            <div key={ad.id} className="form-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+
+                                {/* Componente Inteligente de Mídia com Fallback */}
+                                <ImageCarousel
+                                    images={ad.images && ad.images.length > 0 ? ad.images : (ad.image ? [ad.image] : [])}
+                                    altTitle={ad.title}
+                                />
+
+                                <div className="ad-card-body">
+                                    <div className="ad-card-header">
+                                        <span className="ad-card-badge">{ad.category}</span>
+                                        <span className="ad-card-date">
+                                            {new Date(ad.createdAt).toLocaleDateString('pt-BR')}
+                                        </span>
+                                    </div>
+
+                                    <h3 className="ad-card-title">{ad.title}</h3>
+                                    <p className="ad-card-price">
+                                        {Number(ad.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                    </p>
+
+                                    {/* Aqui no futuro entraremos com os botões de CRUD (Editar/Excluir) */}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
             <footer className="home-footer" style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                 padding: '40px 0 20px 0', borderTop: '1px solid var(--border-color)', marginTop: 'auto', gap: '8px'
