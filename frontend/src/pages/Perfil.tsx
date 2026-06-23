@@ -2,19 +2,19 @@ import { useMemo, useState, useEffect } from 'react';
 import { User, MapPin, Phone, Mail, Edit3, PackageOpen, Trash2 } from 'lucide-react';
 import apego from '../assets/apego.svg';
 import { useAnuncios } from '../context/AnunciosContext';
+import { useAuth } from '../context/AuthContext';
 import ImageCarousel from '../components/ImageCarousel';
 import ConfirmationModal from '../components/ConfirmationModal';
 import '../styles/Perfil.css';
 
 export default function Perfil() {
-    const morador = {
-        nome: "Carlos Eduardo",
-        email: "carlos.edu@email.com",
-        telefone: "(61) 99999-8888",
-        localizacao: "Bloco C - Apto 402"
-    };
 
+    const { user, updateUserSession } = useAuth();
     const { anuncios, setAnuncios } = useAnuncios();
+    const [isEditingUser, setIsEditingUser] = useState(false);
+    const [userNome, setUserNome] = useState('');
+    const [userWhatsapp, setUserWhatsapp] = useState('');
+    const [userLocalizacao, setUserLocalizacao] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedAdId, setSelectedAdId] = useState<string | null>(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -42,9 +42,53 @@ export default function Perfil() {
     }, [anuncios.length, setAnuncios]);
 
     const meusAnuncios = useMemo(() => {
-        return anuncios.filter(ad => ad.author === morador.nome);
-    }, [anuncios, morador.nome]);
+        if (!user) return [];
+        return anuncios.filter(ad => ad.author === user.nome);
+    }, [anuncios, user]);
 
+    const handleStartUserEdit = () => {
+        if (!user) return;
+        setUserNome(user.nome);
+        setUserWhatsapp(user.whatsapp);
+        setUserLocalizacao(user.localizacao);
+        setIsEditingUser(true);
+    };
+
+    const handleUpdateUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!user || !userNome.trim() || !userWhatsapp.trim() || !userLocalizacao.trim()) return;
+
+        try {
+            const response = await fetch(`http://localhost:3000/v1/users/${user.id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nome: userNome,
+                    whatsapp: userWhatsapp,
+                    localizacao: userLocalizacao
+                })
+            });
+
+            if (!response.ok) throw new Error('Falha ao atualizar dados de perfil na API.');
+
+            const updatedData = await response.json();
+
+            if (updateUserSession) {
+                updateUserSession({
+                    ...user,
+                    nome: updatedData.nome,
+                    whatsapp: updatedData.whatsapp,
+                    localizacao: updatedData.localizacao
+                });
+            }
+
+            setIsEditingUser(false);
+
+        } catch (error: unknown) {
+            console.error('Erro na sincronização do Perfil:', error);
+            alert('Não foi possível salvar as alterações do perfil.');
+        }
+    };
 
     const executeDelete = async () => {
         if (!selectedAdId) return;
@@ -59,7 +103,7 @@ export default function Perfil() {
             }
 
             setAnuncios((prevAnuncios) => prevAnuncios.filter(ad => ad.id !== selectedAdId));
-            setIsModalOpen(false); // Fecha o modal após o sucesso
+            setIsModalOpen(false);
 
         } catch (error) {
             console.error('Erro ao excluir anúncio:', error);
@@ -134,32 +178,55 @@ export default function Perfil() {
             <div className="form-card">
                 <div className="perfil-section-header">
                     <h2>Dados do Morador</h2>
-                    <button className="btn btn-edit-profile">
-                        <Edit3 size={16} /> Editar
-                    </button>
+                    {!isEditingUser && (
+                        <button className="btn btn-edit-profile" onClick={handleStartUserEdit}>
+                            <Edit3 size={16} /> Editar
+                        </button>
+                    )}
                 </div>
 
-                <div className="perfil-data-grid">
-                    <div className="form-group perfil-info-group">
-                        <label><User size={14} className="perfil-icon" /> Nome / Apelido</label>
-                        <div className="perfil-info-value">{morador.nome}</div>
-                    </div>
+                {isEditingUser ? (
+                    <form onSubmit={handleUpdateUser} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <div className="form-group perfil-info-group">
+                            <label>Nome / Apelido</label>
+                            <input type="text" value={userNome} onChange={(e) => setUserNome(e.target.value)} required />
+                        </div>
+                        <div className="form-group perfil-info-group">
+                            <label>WhatsApp</label>
+                            <input type="text" value={userWhatsapp} onChange={(e) => setUserWhatsapp(e.target.value)} required />
+                        </div>
+                        <div className="form-group perfil-info-group">
+                            <label>Localização Interna (Bloco/Apto)</label>
+                            <input type="text" value={userLocalizacao} onChange={(e) => setUserLocalizacao(e.target.value)} required />
+                        </div>
+                        <div className="modal-action-row" style={{ marginTop: '8px' }}>
+                            <button type="button" className="btn btn-modal-cancel" onClick={() => setIsEditingUser(false)}>Cancelar</button>
+                            <button type="submit" className="btn btn-save-edit">Salvar Perfil</button>
+                        </div>
+                    </form>
+                ) : (
+                    <div className="perfil-data-grid">
+                        <div className="form-group perfil-info-group">
+                            <label><User size={14} className="perfil-icon" /> Nome / Apelido</label>
+                            <div className="perfil-info-value">{user?.nome}</div>
+                        </div>
 
-                    <div className="form-group perfil-info-group">
-                        <label><Mail size={14} className="perfil-icon" /> E-mail de Acesso</label>
-                        <div className="perfil-info-value">{morador.email}</div>
-                    </div>
+                        <div className="form-group perfil-info-group">
+                            <label><Mail size={14} className="perfil-icon" /> E-mail de Acesso</label>
+                            <div className="perfil-info-value">{user?.email}</div>
+                        </div>
 
-                    <div className="form-group perfil-info-group">
-                        <label><Phone size={14} className="perfil-icon" /> WhatsApp</label>
-                        <div className="perfil-info-value">{morador.telefone}</div>
-                    </div>
+                        <div className="form-group perfil-info-group">
+                            <label><Phone size={14} className="perfil-icon" /> WhatsApp</label>
+                            <div className="perfil-info-value">{user?.whatsapp}</div>
+                        </div>
 
-                    <div className="form-group perfil-info-group">
-                        <label><MapPin size={14} className="perfil-icon" /> Localização Interna</label>
-                        <div className="perfil-info-value">{morador.localizacao}</div>
+                        <div className="form-group perfil-info-group">
+                            <label><MapPin size={14} className="perfil-icon" /> Localização Interna</label>
+                            <div className="perfil-info-value">{user?.localizacao}</div>
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
 
             <div className="perfil-ads-section">

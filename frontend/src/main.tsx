@@ -8,28 +8,41 @@ import Home from './pages/Home';
 import Cadastro from './pages/Cadastro';
 import Feed from './pages/Feed';
 import Perfil from './pages/Perfil';
+import Login from './pages/Login';
+import { AuthProvider } from './context/AuthContext';
+import PrivateRoute from './components/PrivateRoute';
+
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />,
+    element: <App />, 
     children: [
       {
-        path: '/',
+        path: '/', 
         element: <Home />
       },
       {
-        path: '/feed',
-        element: <Feed />
+        path: '/login', 
+        element: <Login />
       },
       {
-        path: '/cadastro',
-        element: <Cadastro />
 
-      },
-      {
-        path: '/perfil',
-        element: <Perfil />
+        element: <PrivateRoute />,
+        children: [
+          {
+            path: '/feed',
+            element: <Feed />
+          },
+          {
+            path: '/cadastro',
+            element: <Cadastro />
+          },
+          {
+            path: '/perfil',
+            element: <Perfil />
+          }
+        ]
       }
     ]
   }
@@ -37,8 +50,10 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <AnunciosProvider>
-      <RouterProvider router={router} />
-    </AnunciosProvider>
-  </React.StrictMode>
+    <AuthProvider>
+      <AnunciosProvider>
+        <RouterProvider router={router} />
+      </AnunciosProvider>
+    </AuthProvider>
+  </React.StrictMode >
 );
