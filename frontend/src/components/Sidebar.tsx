@@ -1,7 +1,9 @@
-import { Link } from 'react-router-dom';
-import { PlusCircle, Home, LayoutGrid, User, X } from 'lucide-react';
-import { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { PlusCircle, Home, LayoutGrid, User, X, LogOut } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import logoApego from '../assets/apego.svg';
+import { useAuth } from '../context/AuthContext';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 interface SidebarProps {
     isOpen: boolean;
@@ -9,6 +11,10 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+    const { isAuthenticated, logout } = useAuth();
+    const navigate = useNavigate();
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
     useEffect(() => {
         if (isOpen) {
             document.body.classList.add('no-scroll');
@@ -19,6 +25,13 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             document.body.classList.remove('no-scroll');
         };
     }, [isOpen]);
+
+    const handleConfirmLogout = () => {
+        setIsLogoutModalOpen(false);
+        onClose();
+        logout();
+        navigate('/login');
+    };
 
     return (
         <>
@@ -56,12 +69,41 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                         <PlusCircle size={18} /> <span>Anunciar Desapego</span>
                     </Link>
 
-                    <Link to="/perfil" className="sidebar-link" onClick={onClose}>
-                        <User size={18} /> <span>Meu Perfil</span>
-                    </Link>
+                    {isAuthenticated && (
+                        <>
+                            <Link to="/perfil" className="sidebar-link" onClick={onClose}>
+                                <User size={18} /> <span>Meu Perfil</span>
+                            </Link>
 
+                            <div className="sidebar-divider" style={{ margin: '8px 0' }} />
+
+                            <button
+                                className="sidebar-link"
+                                onClick={() => setIsLogoutModalOpen(true)}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    width: '100%',
+                                    textAlign: 'left',
+                                    color: '#f87171',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                <LogOut size={18} /> <span>Sair da Conta</span>
+                            </button>
+                        </>
+                    )}
                 </nav>
             </aside>
+            <ConfirmationModal
+                isOpen={isLogoutModalOpen}
+                title="Sair do Aplicativo"
+                message="Tem certeza que deseja encerrar sua sessão? Você precisará digitar seu e-mail e senha novamente para ver os desapegos dos moradores."
+                confirmText="Sim, Sair"
+                cancelText="Permanecer"
+                onConfirm={handleConfirmLogout}
+                onClose={() => setIsLogoutModalOpen(false)}
+            />
         </>
     );
 }

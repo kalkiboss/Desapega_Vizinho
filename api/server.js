@@ -100,40 +100,36 @@ app.delete('/v1/ads/:id', async (req, res) => {
     }
 });
 
-app.put('/v1/ads/:id', async (req, res) => {
+app.put('/v1/users/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const { title, price, description, category } = req.body;
+        const { nome, whatsapp, localizacao } = req.body;
 
-        if (!title || !title.trim()) {
-            return res.status(400).json({ error: 'O título do anúncio é obrigatório.' });
-        }
-        if (!price || isNaN(price) || Number(price) <= 0) {
-            return res.status(400).json({ error: 'O preço deve ser um valor numérico maior que zero.' });
+        if (!nome || !whatsapp || !localizacao) {
+            return res.status(400).json({ error: 'Nome, WhatsApp e Localização são obrigatórios.' });
         }
 
-        const docRef = db.collection('anuncios').doc(id);
-        const docSnap = await docRef.get();
+        const userRef = db.collection('usuarios').doc(id);
+        const userSnap = await userRef.get();
 
-        if (!docSnap.exists) {
-            return res.status(404).json({ error: 'Anúncio não encontrado.' });
+        if (!userSnap.exists) {
+            return res.status(404).json({ error: 'Morador não encontrado no sistema.' });
         }
 
-        const dadosAtualizados = {
-            title: title.trim(),
-            price: Number(price),
-            description: description ? description.trim() : '',
-            category: category || docSnap.data().category
+        const updateData = {
+            nome: nome.trim(),
+            whatsapp: whatsapp.replace(/\D/g, ''),
+            localizacao: localizacao.trim()
         };
 
-        await docRef.update(dadosAtualizados);
+        await userRef.update(updateData);
 
-        console.log(`✏️ Anúncio ${id} atualizado com sucesso no Firebase.`);
-        return res.status(200).json({ id, ...dadosAtualizados });
+        console.log(`👤 Perfil do morador ${id} atualizado com sucesso.`);
+        return res.status(200).json({ id, ...updateData, email: userSnap.data().email });
 
     } catch (error) {
-        console.error('Erro ao atualizar anúncio:', error);
-        return res.status(500).json({ error: 'Erro interno ao processar a atualização do anúncio.' });
+        console.error('Erro ao atualizar perfil do morador:', error);
+        return res.status(500).json({ error: 'Erro interno ao processar a atualização cadastral.' });
     }
 });
 

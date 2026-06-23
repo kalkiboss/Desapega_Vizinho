@@ -1,11 +1,19 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { PlusCircle, Menu } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { PlusCircle, Menu, LogOut } from 'lucide-react';
 import logoApego from '../assets/apego.svg';
 import Sidebar from '../components/Sidebar';
+import { useAuth } from '../context/AuthContext';
 
 export default function Navbar() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const { isAuthenticated, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogoutClick = () => {
+        logout();
+        navigate('/login');
+    };
 
     return (
         <header className="navbar-header">
@@ -23,12 +31,32 @@ export default function Navbar() {
 
 
                 <nav className="navbar-menu desktop-only">
-                    <Link to="/perfil" className="nav-link">Meu Perfil</Link>
+                    {isAuthenticated && (
+                        <Link to="/perfil" className="nav-link">Meu Perfil</Link>
+                    )}
+                    
                     <Link to="/" className="nav-link">Início</Link>
                     <Link to="/feed" className="nav-link">Anúncios</Link>
                     <Link to="/cadastro" className="nav-link nav-cta">
                         <PlusCircle size={16} /> Anunciar
                     </Link>
+
+                    {isAuthenticated && (
+                        <button 
+                            className="nav-link btn-logout" 
+                            onClick={handleLogoutClick}
+                            style={{ 
+                                background: 'none', 
+                                border: 'none', 
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px'
+                            }}
+                        >
+                            <LogOut size={16} /> Sair
+                        </button>
+                    )}
                 </nav>
 
 

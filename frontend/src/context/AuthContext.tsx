@@ -16,6 +16,7 @@ interface AuthContextType {
     login: (dados: any) => Promise<void>;
     register: (dados: any) => Promise<void>;
     logout: () => void;
+    updateUserSession: (updatedUser: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
@@ -75,6 +76,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
     };
 
+    const updateUserSession = (updatedUser: User) => {
+        setUser(updatedUser);
+        localStorage.setItem('@Desapega:user', JSON.stringify(updatedUser));
+    };
+
     return (
         <AuthContext.Provider value={{ 
             user, 
@@ -83,7 +89,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             isLoading, 
             login, 
             register, 
-            logout 
+            logout,
+            updateUserSession 
         }}>
             {children}
         </AuthContext.Provider>
