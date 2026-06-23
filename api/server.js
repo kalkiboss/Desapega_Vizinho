@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import { db } from './config/firebase.js';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 
 const app = express();
 
@@ -135,6 +137,90 @@ app.put('/v1/ads/:id', async (req, res) => {
     }
 });
 
+app.post('/v1/auth/register', async (req, res) => {
+    try {
+        const { nome, email, password, whatsapp, localizacao } = req.body;
+
+        if (!nome || !email || !password || !whatsapp || !localizacao) {
+            return res.status(400).json({ error: 'Todos os campos de cadastro são obrigatórios.' });
+        }
+
+        const usersRef = db.collection('usuarios');
+        const snapshot = await usersRef.where('email', '==', email.trim()).get();
+        
+        if (!snapshot.empty) {
+            return res.status(409).json({ error: 'Este e-mail já está em uso por outro morador.' });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+        const newUser = {
+            nome: nome.trim(),
+            email: email.toLowerCase().trim(),
+            password: hashedPassword,
+            whatsapp: whatsapp.replace(/\D/g, ''),
+            localizacao: localizacao.trim(),
+            createdAt: new Date().toISOString()
+        };
+
+        const docRef = await usersRef.add(newUser);
+
+        delete newUser.password;
+
+        console.log(`🛡️ Novo morador cadastrado: ${newUser.nome}`);
+        return res.status(201).json({ id: docRef.id, ...newUser });
+
+    } catch (error) {
+        console.error('Erro no registro de usuário:', error);
+        return res.status(500).json({ error: 'Erro interno ao processar o cadastro.' });
+    }
+});
+
+app.post('/v1/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ error: 'E-mail e senha são obrigatórios.' });
+        }
+
+        const usersRef = db.collection('usuarios');
+        const snapshot = await usersRef.where('email', '==', email.toLowerCase().trim()).limit(1).get();
+
+        if (snapshot.empty) {
+            return res.status(401).json({ error: 'Credenciais inválidas. Morador não encontrado.' });
+        }
+
+        const userDoc = snapshot.docs[0];
+        const userData = userDoc.data();
+
+        const isPasswordValid = await bcrypt.compare(password, userData.password);
+
+        if (!isPasswordValid) {
+            return res.status(401).json({ error: 'Credenciais inválidas. Senha incorreta.' });
+        }
+
+        const token = jwt.sign(
+            { id: userDoc.id, email: userData.email },
+            'DESAPEGA_VIZINHO_CHAVE_SECRETA',
+            { expiresIn: '7d' }
+        );
+
+        delete userData.password;
+
+        console.log(`🔓 Acesso autorizado: ${userData.nome}`);
+        
+        return res.status(200).json({
+            message: 'Login realizado com sucesso',
+            token,
+            user: { id: userDoc.id, ...userData }
+        });
+
+    } catch (error) {
+        console.error('Erro no login:', error);
+        return res.status(500).json({ error: 'Erro interno ao processar a autenticação.' });
+    }
+});
 
 const PORT = 3000;
 app.listen(PORT, () => {
