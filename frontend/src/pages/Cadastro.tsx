@@ -1,6 +1,7 @@
 import React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { useAnuncios } from '../context/AnunciosContext';
 import apego from '../assets/apego.svg';
 
@@ -8,14 +9,15 @@ export default function Cadastro() {
 
     const navigate = useNavigate();
     const { anuncios, setAnuncios } = useAnuncios();
+    const { user } = useAuth();
 
     const [title, setTitle] = useState('');
     const [category, setCategory] = useState('OUTROS');
     const [price, setPrice] = useState('');
     const [description, setDescription] = useState('');
-    const [author, setAuthor] = useState('');
-    const [phone, setPhone] = useState('');
-    const [location, setLocation] = useState('');
+    const [author, setAuthor] = useState(user?.nome || '');
+    const [phone, setPhone] = useState(user?.whatsapp || '');
+    const [location, setLocation] = useState(user?.localizacao || '');
     const [error, setError] = useState('');
     const [images, setImages] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -83,26 +85,22 @@ export default function Cadastro() {
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         setError('');
 
-        // Converte os arquivos recebidos em um Array real do JavaScript
         const arquivosSelecionados = Array.from(e.target.files || []);
         if (arquivosSelecionados.length === 0) return;
 
-        // Trava de segurança: Máximo de 4 fotos por anúncio para não estourar o banco
         if (images.length + arquivosSelecionados.length > 4) {
+            e.target.value = '';
             return setError('Você pode enviar no máximo 4 fotos por anúncio.');
         }
 
         const novasImagens: string[] = [];
 
-        // Processa cada arquivo individualmente
         for (const arquivo of arquivosSelecionados) {
-            // Verifica o tamanho de cada foto
-            if (arquivo.size > 2 * 1024 * 1024) {
-                setError(`A imagem ${arquivo.name} passou do limite de 2MB e foi ignorada.`);
-                continue;
+           if (arquivo.size > 2 * 1024 * 1024) {
+                e.target.value = '';
+                return setError(`A imagem "${arquivo.name}" passou do limite de 2MB. Envio cancelado.`);
             }
 
-            // Lê o arquivo empacotado em uma Promise para não travar a UI
             const base64 = await new Promise<string>((resolve, reject) => {
                 const leitor = new FileReader();
                 leitor.onloadend = () => resolve(leitor.result as string);
@@ -113,8 +111,8 @@ export default function Cadastro() {
             novasImagens.push(base64);
         }
 
-        // Junta as fotos que já estavam no estado com as novas que acabaram de chegar
         setImages((prevImages) => [...prevImages, ...novasImagens]);
+        e.target.value = '';
     };
 
     const removeImage = (indexToRemove: number) => {
