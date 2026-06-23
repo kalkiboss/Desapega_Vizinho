@@ -1,0 +1,189 @@
+.perfil-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding-top: 32px;
+}
+
+.perfil-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.perfil-avatar {
+  width: 64px;
+  height: 64px;
+  background-color: var(--color-secondary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+}
+
+.perfil-title {
+  font-size: var(--fs-xl);
+  font-weight: 900;
+}
+
+.perfil-subtitle {
+  color: var(--text-secondary);
+}
+
+.perfil-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.perfil-section-header.no-margin {
+  margin-bottom: 0;
+}
+
+.btn-edit-profile {
+  background-color: var(--color-secondary);
+  color: var(--color-primary);
+  padding: 8px 16px;
+  font-size: var(--fs-sm);
+}
+
+.btn-edit-profile:hover {
+  background-color: var(--color-secondary-hover);
+}
+
+.perfil-data-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.perfil-info-group {
+  margin-bottom: 0;
+}
+
+.perfil-icon {
+  display: inline;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.perfil-info-value {
+  padding: 12px 16px;
+  background-color: var(--bg-global);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  font-weight: 600;
+}
+
+.perfil-ads-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.perfil-ads-count {
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
+.perfil-empty-state {
+  background-color: var(--bg-surface);
+  border-radius: 24px;
+  border: 1px solid var(--border-color);
+}
+
+.perfil-empty-icon {
+  margin: 0 auto 16px;
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
+.perfil-ad-card {
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.perfil-card-actions {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  gap: 12px;
+}
+
+.btn-delete-ad {
+  flex: 1;
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 10px;
+  font-size: var(--fs-sm);
+}
+
+.btn-delete-ad:hover {
+  background-color: #fca5a5;
+}
+
+.btn-edit-ad {
+  flex: 1;
+  background-color: var(--color-secondary);
+  color: var(--color-primary);
+  padding: 10px;
+  font-size: var(--fs-sm);
+}
+
+.btn-edit-ad:hover {
+  background-color: var(--color-secondary-hover);
+}
+
+.perfil-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0 20px 0;
+  border-top: 1px solid var(--border-color);
+  margin-top: auto;
+  gap: 8px;
+}
+
+.perfil-footer-logo {
+  height: 32px;
+  object-fit: contain;
+}
+
+.perfil-footer-text {
+  font-size: var(--fs-xs);
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.edit-modal-backdrop {
+  z-index: 11000;
+}
+
+.edit-modal-card {
+  max-width: 500px;
+}
+
+.edit-modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.btn-save-edit {
+  flex: 1;
+  background-color: var(--color-primary);
+  color: #fff;
+  justify-content: center;
+}
+
+.btn-save-edit:hover {
+  background-color: var(--color-primary-hover);
+}

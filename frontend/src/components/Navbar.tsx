@@ -23,6 +23,7 @@ export default function Navbar() {
 
 
                 <nav className="navbar-menu desktop-only">
+                    <Link to="/perfil" className="nav-link">Meu Perfil</Link>
                     <Link to="/" className="nav-link">Início</Link>
                     <Link to="/feed" className="nav-link">Anúncios</Link>
                     <Link to="/cadastro" className="nav-link nav-cta">
