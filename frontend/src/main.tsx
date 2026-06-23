@@ -8,12 +8,17 @@ import Home from './pages/Home';
 import Cadastro from './pages/Cadastro';
 import Feed from './pages/Feed';
 import Perfil from './pages/Perfil';
+import Login from './pages/Login';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <App />,
     children: [
+      {
+        path: '/login',
+        element: <Login />
+      },
       {
         path: '/',
         element: <Home />
