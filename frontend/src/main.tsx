@@ -7,6 +7,7 @@ import App from './App';
 import Home from './pages/Home';
 import Cadastro from './pages/Cadastro';
 import Feed from './pages/Feed';
+import Perfil from './pages/Perfil';
 
 const router = createBrowserRouter([
   {
@@ -24,6 +25,11 @@ const router = createBrowserRouter([
       {
         path: '/cadastro',
         element: <Cadastro />
+
+      },
+      {
+        path: '/perfil',
+        element: <Perfil />
       }
     ]
   }
