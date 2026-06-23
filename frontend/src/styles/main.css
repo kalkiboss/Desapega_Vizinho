@@ -72,7 +72,7 @@ a {
   position: sticky;
   top: 16px;
   z-index: 50;
-  background: transparent; 
+  background: transparent;
   box-shadow: none;
   border: none;
   padding: 0 24px;
@@ -82,12 +82,13 @@ a {
   max-width: 900px;
   margin: 0 auto;
   padding: 8px 24px;
-  height: 56px; 
-  background-color: rgba(12, 10, 9, 0.85); /* Fundo escuro premium semi-transparente */
+  height: 56px;
+  background-color: rgba(12, 10, 9, 0.85);
+  /* Fundo escuro premium semi-transparente */
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 9999px; 
+  border-radius: 9999px;
   box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
@@ -114,7 +115,7 @@ a {
 .navbar-menu {
   display: flex;
   align-items: center;
-  gap: 8px; 
+  gap: 8px;
 }
 
 .nav-link {
@@ -144,7 +145,7 @@ a {
 
 .nav-cta {
   background-color: #ffffff;
-  color: #0c0a09 !important; 
+  color: #0c0a09 !important;
   font-weight: 700;
   display: flex;
   align-items: center;
@@ -301,13 +302,13 @@ a {
   border-radius: 9999px;
   justify-content: center;
   padding: 16px;
-  margin-top: auto; 
+  margin-top: auto;
   margin-bottom: 24px;
   box-shadow: 0 10px 25px rgba(255, 255, 255, 0.05);
 }
 
 .sidebar-link.sidebar-cta svg {
-  display: inline !important; 
+  display: inline !important;
   color: #000000;
 }
 
@@ -655,7 +656,7 @@ a {
   flex-direction: column;
   gap: 64px;
   padding-bottom: 64px;
-  padding-top: 96px; 
+  padding-top: 96px;
 }
 
 .hero-app-style {

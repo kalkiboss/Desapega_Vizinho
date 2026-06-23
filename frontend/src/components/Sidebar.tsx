@@ -45,7 +45,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <div className="sidebar-brand-header">
                     <div className="sidebar-logo-group">
                         <img src={logoApego} alt="Logo" className="sidebar-mini-logo" />
-                        <span className="sidebar-brand-name">Desapega Vizinho</span>
+                        <span className="sidebar-brand-name">  Desapega Vizinho</span>
                     </div>
                     <button className="sidebar-close-btn" onClick={onClose} aria-label="Fechar menu">
                         <X size={20} />
