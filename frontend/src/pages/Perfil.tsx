@@ -1,8 +1,9 @@
-import { useMemo } from 'react';
-import { User, MapPin, Phone, Mail, Edit3, PackageOpen } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { User, MapPin, Phone, Mail, Edit3, PackageOpen, Trash2 } from 'lucide-react';
 import apego from '../assets/apego.svg';
 import { useAnuncios } from '../context/AnunciosContext';
 import ImageCarousel from '../components/ImageCarousel';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 export default function Perfil() {
     const morador = {
@@ -12,11 +13,43 @@ export default function Perfil() {
         localizacao: "Bloco C - Apto 402"
     };
 
-    const { anuncios } = useAnuncios();
+    const { anuncios, setAnuncios } = useAnuncios();
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedAdId, setSelectedAdId] = useState<string | null>(null);
 
     const meusAnuncios = useMemo(() => {
         return anuncios.filter(ad => ad.author === morador.nome);
     }, [anuncios, morador.nome]);
+
+
+    const executeDelete = async () => {
+        if (!selectedAdId) return;
+
+        try {
+            const response = await fetch(`http://localhost:3000/v1/ads/${selectedAdId}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                throw new Error('Falha ao comunicar com o servidor.');
+            }
+
+            setAnuncios((prevAnuncios) => prevAnuncios.filter(ad => ad.id !== selectedAdId));
+            setIsModalOpen(false); // Fecha o modal após o sucesso
+
+        } catch (error) {
+            console.error('Erro ao excluir anúncio:', error);
+            alert('Erro de conexão. Não foi possível excluir o anúncio no momento.');
+        } finally {
+            setSelectedAdId(null);
+        }
+    };
+
+    const openDeleteConfirmation = (id: string) => {
+        setSelectedAdId(id);
+        setIsModalOpen(true);
+    };
 
     return (
         <div className="page-container" style={{ display: 'flex', flexDirection: 'column', gap: '32px', paddingTop: '32px' }}>
@@ -89,7 +122,6 @@ export default function Perfil() {
                         {meusAnuncios.map((ad) => (
                             <div key={ad.id} className="form-card" style={{ padding: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
-                                {/* Componente Inteligente de Mídia com Fallback */}
                                 <ImageCarousel
                                     images={ad.images && ad.images.length > 0 ? ad.images : (ad.image ? [ad.image] : [])}
                                     altTitle={ad.title}
@@ -108,7 +140,16 @@ export default function Perfil() {
                                         {Number(ad.price).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
                                     </p>
 
-                                    {/* Aqui no futuro entraremos com os botões de CRUD (Editar/Excluir) */}
+                                    <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--border-color)', display: 'flex', gap: '12px' }}>
+                                        <button
+                                            className="btn"
+                                            onClick={() => openDeleteConfirmation(ad.id)}
+                                            style={{ flex: 1, backgroundColor: '#fee2e2', color: '#b91c1c', padding: '10px', fontSize: 'var(--fs-sm)' }}
+                                        >
+                                            <Trash2 size={16} /> Excluir
+                                        </button>
+
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -126,6 +167,17 @@ export default function Perfil() {
                 </p>
             </footer>
 
+            <ConfirmationModal
+                isOpen={isModalOpen}
+                title="Excluir Anúncio"
+                message="Tem certeza que deseja remover este desapego? Essa ação é permanente e o item sumirá imediatamente do feed do condomínio."
+                confirmText="Sim, Excluir"
+                cancelText="Manter Anúncio"
+                onConfirm={executeDelete}
+                onClose={() => { setIsModalOpen(false); setSelectedAdId(null); }}
+            />
+
         </div>
     );
+
 }

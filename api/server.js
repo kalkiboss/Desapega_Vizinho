@@ -72,6 +72,32 @@ app.get('/v1/ads', async (req, res) => {
     }
 });
 
+app.delete('/v1/ads/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            return res.status(400).json({ error: 'O ID do anúncio é obrigatório para exclusão.' });
+        }
+
+        const docRef = db.collection('anuncios').doc(id);
+        const docSnap = await docRef.get();
+
+        if (!docSnap.exists) {
+            return res.status(404).json({ error: 'Anúncio não encontrado no banco de dados.' });
+        }
+
+        await docRef.delete();
+
+        console.log(`🗑️ Anúncio ${id} excluído com sucesso por solicitação do morador.`);
+        return res.status(200).json({ success: true, message: 'Anúncio removido com sucesso.' });
+
+    } catch (error) {
+        console.error('Erro na integração HTTP ao deletar anúncio:', error);
+        return res.status(500).json({ error: 'Erro interno ao processar a exclusão do anúncio.' });
+    }
+});
+
 const PORT = 3000;
 app.listen(PORT, () => {
     console.log(` API REST Privada do Desapega Vizinho rodando na porta ${PORT}`);
