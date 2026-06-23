@@ -7,6 +7,7 @@ import ImageCarousel from '../components/ImageCarousel';
 export default function Feed() {
     const { anuncios, setAnuncios, carregando, setCarregando } = useAnuncios();
     const [searchTerm, setSearchTerm] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState('TODOS');
 
 
     const anunciosFiltrados = useMemo(() => {
@@ -15,10 +16,13 @@ export default function Feed() {
         return anuncios.filter((ad) => {
             const tituloContem = (ad.title || '').toLowerCase().includes(termoBusca);
             const descricaoContem = (ad.description || '').toLowerCase().includes(termoBusca);
-            return tituloContem || descricaoContem;
+            const matchesSearch = tituloContem || descricaoContem;
+            const matchesCategory = selectedCategory === 'TODOS' || ad.category === selectedCategory;
+
+            return matchesSearch && matchesCategory;
         });
 
-    }, [anuncios, searchTerm]);
+    }, [anuncios, searchTerm, selectedCategory]);
 
     useEffect(() => {
         const buscarAnuncios = async () => {
@@ -61,6 +65,18 @@ export default function Feed() {
                     onChange={(e) => setSearchTerm(e.target.value)} />
             </div>
 
+            <div className="categories-filter-container">
+                {['TODOS', 'MÓVEIS', 'ELETRÔNICOS', 'VEÍCULOS', 'SERVIÇOS', 'OUTROS'].map((cat) => (
+                    <button
+                        key={cat}
+                        className={`category-pill ${selectedCategory === cat ? 'active' : ''}`}
+                        onClick={() => setSelectedCategory(cat)}
+                    >
+                        {cat === 'TODOS' ? 'Todos' : cat.charAt(0) + cat.slice(1).toLowerCase()}
+                    </button>
+                ))}
+            </div>
+
             {carregando ? (
                 <div className="feed-status">
                     <p>Carregando anúncios do condomínio...</p>
@@ -71,7 +87,11 @@ export default function Feed() {
                 </div>
             ) : anunciosFiltrados.length === 0 ? (
                 <div className="feed-status">
-                    <p>Nenhum desapego encontrado para a sua busca: "{searchTerm}"</p>
+                    {searchTerm ? (
+                        <p>Nenhum desapego encontrado para a busca: <strong>"{searchTerm}"</strong> {selectedCategory !== 'TODOS' ? `em ${selectedCategory}` : ''}.</p>
+                    ) : (
+                        <p>Ainda não há produtos cadastrados na categoria <strong>{selectedCategory}</strong>. Seja o primeiro a anunciar!</p>
+                    )}
                 </div>
             ) : (
                 <div className="ads-grid">
