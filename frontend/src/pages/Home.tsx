@@ -8,7 +8,7 @@ export default function Home() {
             <section className="hero-app-style">
                 <div className="hero-content-wrapper">
                     <div className="pill-badge">
-                        <span className="live-dot"></span> Exclusivo para moradores
+                        <span></span> Exclusivo para moradores
                     </div>
                     <h1 className="hero-title-bold">
                         Seu condomínio virou um <span className="text-gradient">shopping privado.</span>
