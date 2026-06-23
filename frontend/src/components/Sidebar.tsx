@@ -45,56 +45,48 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 <div className="sidebar-brand-header">
                     <div className="sidebar-logo-group">
                         <img src={logoApego} alt="Logo" className="sidebar-mini-logo" />
-                        <span className="sidebar-brand-name">Desapega</span>
+                        <span className="sidebar-brand-name">Desapega Vizinho</span>
                     </div>
                     <button className="sidebar-close-btn" onClick={onClose} aria-label="Fechar menu">
                         <X size={20} />
                     </button>
                 </div>
 
-
-                <div className="sidebar-divider" />
-
                 <nav className="sidebar-menu-links">
                     <Link to="/" className="sidebar-link" onClick={onClose}>
-                        <Home size={18} /> <span>Início</span>
+                        <Home size={18} /> Início
                     </Link>
+                    
                     <Link to="/feed" className="sidebar-link" onClick={onClose}>
-                        <LayoutGrid size={18} /> <span>Anúncios</span>
+                        <LayoutGrid size={18} /> Anúncios
                     </Link>
 
-                    <div className="sidebar-divider" style={{ margin: '8px 0' }} />
+                    {isAuthenticated && (
+                        <Link to="/perfil" className="sidebar-link" onClick={onClose}>
+                            <User size={18} /> Meu Perfil
+                        </Link>
+                    )}
+
+                    {isAuthenticated && (
+                        <button
+                            className="sidebar-link btn-sidebar-logout"
+                            onClick={() => setIsLogoutModalOpen(true)}
+                            style={{ 
+                                background: 'none', 
+                                border: 'none', 
+                                cursor: 'pointer' 
+                            }}
+                        >
+                            <LogOut size={18} /> Sair da Conta
+                        </button>
+                    )}
 
                     <Link to="/cadastro" className="sidebar-link sidebar-cta" onClick={onClose}>
                         <PlusCircle size={18} /> <span>Anunciar Desapego</span>
                     </Link>
-
-                    {isAuthenticated && (
-                        <>
-                            <Link to="/perfil" className="sidebar-link" onClick={onClose}>
-                                <User size={18} /> <span>Meu Perfil</span>
-                            </Link>
-
-                            <div className="sidebar-divider" style={{ margin: '8px 0' }} />
-
-                            <button
-                                className="sidebar-link"
-                                onClick={() => setIsLogoutModalOpen(true)}
-                                style={{
-                                    background: 'none',
-                                    border: 'none',
-                                    width: '100%',
-                                    textAlign: 'left',
-                                    color: '#f87171',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                <LogOut size={18} /> <span>Sair da Conta</span>
-                            </button>
-                        </>
-                    )}
                 </nav>
             </aside>
+
             <ConfirmationModal
                 isOpen={isLogoutModalOpen}
                 title="Sair do Aplicativo"

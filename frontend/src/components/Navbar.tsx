@@ -4,17 +4,19 @@ import { PlusCircle, Menu, LogOut } from 'lucide-react';
 import logoApego from '../assets/apego.svg';
 import Sidebar from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 export default function Navbar() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const { isAuthenticated, logout } = useAuth();
     const navigate = useNavigate();
 
-    const handleLogoutClick = () => {
+    const handleConfirmLogout = () => {
+        setIsLogoutModalOpen(false);
         logout();
         navigate('/login');
     };
-
     return (
         <header className="navbar-header">
             <div className="navbar-container">
@@ -31,32 +33,33 @@ export default function Navbar() {
 
 
                 <nav className="navbar-menu desktop-only">
+                    <Link to="/" className="nav-link">Início</Link>
+                    <Link to="/feed" className="nav-link">Anúncios</Link>
+                    
                     {isAuthenticated && (
                         <Link to="/perfil" className="nav-link">Meu Perfil</Link>
                     )}
-                    
-                    <Link to="/" className="nav-link">Início</Link>
-                    <Link to="/feed" className="nav-link">Anúncios</Link>
                     <Link to="/cadastro" className="nav-link nav-cta">
                         <PlusCircle size={16} /> Anunciar
                     </Link>
-
                     {isAuthenticated && (
-                        <button 
-                            className="nav-link btn-logout" 
-                            onClick={handleLogoutClick}
-                            style={{ 
-                                background: 'none', 
-                                border: 'none', 
+                        <button
+                            className="nav-link btn-logout"
+                            onClick={() => setIsLogoutModalOpen(true)}
+                            style={{
+                                background: 'none',
+                                border: 'none',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '6px'
                             }}
                         >
-                            <LogOut size={16} /> Sair
+                            <LogOut size={16} /> Sair da Conta
                         </button>
                     )}
+
+                
                 </nav>
 
 
@@ -70,6 +73,15 @@ export default function Navbar() {
             </div>
 
             <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+            <ConfirmationModal
+                isOpen={isLogoutModalOpen}
+                title="Sair do Aplicativo"
+                message="Tem certeza que deseja encerrar sua sessão? Você precisará digitar seu e-mail e senha novamente para ver os desapegos dos moradores."
+                confirmText="Sim, Sair"
+                cancelText="Permanecer"
+                onConfirm={handleConfirmLogout}
+                onClose={() => setIsLogoutModalOpen(false)}
+            />
         </header>
     );
 }
